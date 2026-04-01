@@ -402,7 +402,9 @@ export default function HomePage({
                 className={`bg-white rounded-2xl p-4 shadow-card flex items-center justify-between border-l-4 ${
                   order.status === "pending"
                     ? "border-l-yellow-400"
-                    : "border-l-orange-400"
+                    : order.status === "success"
+                      ? "border-l-green-400"
+                      : "border-l-orange-400"
                 }`}
               >
                 <div>
@@ -424,6 +426,10 @@ export default function HomePage({
                   {order.status === "pending" ? (
                     <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
                       Pending
+                    </span>
+                  ) : order.status === "success" ? (
+                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                      ✓ Success
                     </span>
                   ) : (
                     <>

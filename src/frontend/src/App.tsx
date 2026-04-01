@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { useState } from "react";
+import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
 import MainApp from "./pages/MainApp";
 
@@ -20,7 +21,7 @@ export interface ProcessingOrder {
   amount: number;
   date: string;
   type?: "payment" | "withdrawal";
-  status?: "processing" | "pending";
+  status?: "processing" | "pending" | "success";
 }
 
 export type UsersStore = Record<string, UserData>;
@@ -49,6 +50,9 @@ function setCurrentUser(username: string | null) {
   }
 }
 
+const ADMIN_ID = "admin";
+const ADMIN_PASS = "admin";
+
 export default function App() {
   const [currentUser, setCurrentUserState] = useState<string | null>(() =>
     getCurrentUser(),
@@ -58,7 +62,16 @@ export default function App() {
     [],
   );
 
+  const isAdmin = currentUser === ADMIN_ID;
+
   function handleLogin(username: string, password: string): string | null {
+    // Admin shortcut
+    if (username === ADMIN_ID && password === ADMIN_PASS) {
+      setCurrentUser(ADMIN_ID);
+      setCurrentUserState(ADMIN_ID);
+      return null;
+    }
+
     const users = getUsers();
     if (!users[username]) return "User not found";
     if (users[username].password !== password) return "Incorrect password";
@@ -75,6 +88,7 @@ export default function App() {
   }
 
   function handleRegister(username: string, password: string): string | null {
+    if (username === ADMIN_ID) return "Username not available";
     const users = getUsers();
     if (users[username]) return "Username already taken";
     users[username] = {
@@ -105,8 +119,22 @@ export default function App() {
     setProcessingOrders((prev) => [...prev, order]);
   }
 
+  function handleUpdateOrder(
+    orderId: string,
+    status: "success" | "processing",
+  ) {
+    setProcessingOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId
+          ? { ...o, status: status as ProcessingOrder["status"] }
+          : o,
+      ),
+    );
+  }
+
   function handleChangeUsername(newUsername: string): string | null {
     if (!currentUser) return "Not logged in";
+    if (newUsername === ADMIN_ID) return "Username not available";
     const users = getUsers();
     if (users[newUsername]) return "Username already taken";
     const userData = users[currentUser];
@@ -118,12 +146,18 @@ export default function App() {
     return null;
   }
 
-  const userData = currentUser ? getUsers()[currentUser] : null;
+  const userData = currentUser && !isAdmin ? getUsers()[currentUser] : null;
 
   return (
     <div className="min-h-screen bg-[#FEF3E8] flex items-start justify-center">
       <div className="w-full max-w-[430px] min-h-screen relative">
-        {currentUser && userData ? (
+        {isAdmin ? (
+          <AdminPage
+            processingOrders={processingOrders}
+            onUpdateOrder={handleUpdateOrder}
+            onLogout={handleLogout}
+          />
+        ) : currentUser && userData ? (
           <MainApp
             username={currentUser}
             userData={userData}
@@ -145,7 +179,7 @@ export default function App() {
             <div className="text-5xl mb-3">🎁</div>
             <h2 className="text-2xl font-bold">Welcome Bonus!</h2>
             <p className="text-white/80 text-sm mt-1">
-              Congratulations on joining INR Trade
+              Congratulations on joining BigBoss Pay
             </p>
           </div>
           <div className="bg-white px-6 py-6 text-center">
