@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { useState } from "react";
 import AdminPage from "./pages/AdminPage";
@@ -26,6 +24,9 @@ export interface ProcessingOrder {
 
 export type UsersStore = Record<string, UserData>;
 
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "admin";
+
 function getUsers(): UsersStore {
   try {
     return JSON.parse(localStorage.getItem("inr_users") || "{}");
@@ -38,172 +39,170 @@ function saveUsers(users: UsersStore) {
   localStorage.setItem("inr_users", JSON.stringify(users));
 }
 
-function getCurrentUser(): string | null {
-  return localStorage.getItem("inr_current_user");
-}
-
-function setCurrentUser(username: string | null) {
-  if (username) {
-    localStorage.setItem("inr_current_user", username);
-  } else {
-    localStorage.removeItem("inr_current_user");
+function getOrders(username: string): ProcessingOrder[] {
+  try {
+    return JSON.parse(localStorage.getItem(`inr_orders_${username}`) || "[]");
+  } catch {
+    return [];
   }
 }
 
-const ADMIN_ID = "admin";
-const ADMIN_PASS = "admin";
+function saveOrders(username: string, orders: ProcessingOrder[]) {
+  localStorage.setItem(`inr_orders_${username}`, JSON.stringify(orders));
+}
 
 export default function App() {
-  const [currentUser, setCurrentUserState] = useState<string | null>(() =>
-    getCurrentUser(),
-  );
-  const [showBonusPopup, setShowBonusPopup] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [processingOrders, setProcessingOrders] = useState<ProcessingOrder[]>(
     [],
   );
 
-  const isAdmin = currentUser === ADMIN_ID;
-
   function handleLogin(username: string, password: string): string | null {
-    // Admin shortcut
-    if (username === ADMIN_ID && password === ADMIN_PASS) {
-      setCurrentUser(ADMIN_ID);
-      setCurrentUserState(ADMIN_ID);
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      setLoggedInUser(ADMIN_USER);
+      setIsAdmin(true);
+      const allOrders: ProcessingOrder[] = [];
+      const users = getUsers();
+      for (const u of Object.keys(users)) {
+        const orders = getOrders(u);
+        allOrders.push(...orders);
+      }
+      setProcessingOrders(allOrders);
       return null;
     }
-
     const users = getUsers();
-    if (!users[username]) return "User not found";
+    if (!users[username]) return "Username not found";
     if (users[username].password !== password) return "Incorrect password";
-    setCurrentUser(username);
-    setCurrentUserState(username);
-
-    if (!users[username].hasBonus) {
-      users[username].hasBonus = true;
-      users[username].balance += 400;
-      saveUsers(users);
-      setTimeout(() => setShowBonusPopup(true), 400);
-    }
+    setLoggedInUser(username);
+    setIsAdmin(false);
+    setUserData(users[username]);
+    setProcessingOrders(getOrders(username));
     return null;
   }
 
   function handleRegister(username: string, password: string): string | null {
-    if (username === ADMIN_ID) return "Username not available";
+    if (username === ADMIN_USER) return "Username not allowed";
     const users = getUsers();
     if (users[username]) return "Username already taken";
-    users[username] = {
+    const newUser: UserData = {
       password,
-      balance: 0,
+      balance: 400,
       deposit: 0,
       sell: 0,
-      commission: 0,
-      hasBonus: false,
+      commission: 9,
+      hasBonus: true,
     };
+    users[username] = newUser;
     saveUsers(users);
+    // Give new users 5 USDT welcome bonus
+    localStorage.setItem(`bbp_usdt_${username}`, "5");
     return null;
   }
 
   function handleLogout() {
-    setCurrentUser(null);
-    setCurrentUserState(null);
+    setLoggedInUser(null);
+    setIsAdmin(false);
+    setUserData(null);
+    setProcessingOrders([]);
   }
 
-  function updateBalance(amount: number) {
-    if (!currentUser) return;
+  function handleUpdateBalance(amount: number) {
+    if (!loggedInUser || !userData) return;
     const users = getUsers();
-    users[currentUser].balance += amount;
+    users[loggedInUser].balance = (users[loggedInUser].balance || 0) + amount;
     saveUsers(users);
+    setUserData({ ...users[loggedInUser] });
   }
 
-  function addProcessingOrder(order: ProcessingOrder) {
-    setProcessingOrders((prev) => [...prev, order]);
+  function handleAddProcessingOrder(order: ProcessingOrder) {
+    if (!loggedInUser) return;
+    const updated = [
+      ...processingOrders,
+      { ...order, status: "processing" as const },
+    ];
+    setProcessingOrders(updated);
+    saveOrders(loggedInUser, updated);
   }
 
   function handleUpdateOrder(
     orderId: string,
     status: "success" | "processing",
   ) {
+    const allOrderKeys = Object.keys(localStorage).filter((k) =>
+      k.startsWith("inr_orders_"),
+    );
+    for (const key of allOrderKeys) {
+      try {
+        const orders: ProcessingOrder[] = JSON.parse(
+          localStorage.getItem(key) || "[]",
+        );
+        const idx = orders.findIndex((o) => o.id === orderId);
+        if (idx !== -1) {
+          orders[idx].status = status;
+          localStorage.setItem(key, JSON.stringify(orders));
+          break;
+        }
+      } catch {
+        // ignore
+      }
+    }
     setProcessingOrders((prev) =>
-      prev.map((o) =>
-        o.id === orderId
-          ? { ...o, status: status as ProcessingOrder["status"] }
-          : o,
-      ),
+      prev.map((o) => (o.id === orderId ? { ...o, status } : o)),
     );
   }
 
   function handleChangeUsername(newUsername: string): string | null {
-    if (!currentUser) return "Not logged in";
-    if (newUsername === ADMIN_ID) return "Username not available";
+    if (!loggedInUser || !userData) return "Not logged in";
+    if (newUsername === ADMIN_USER) return "Username not allowed";
     const users = getUsers();
     if (users[newUsername]) return "Username already taken";
-    const userData = users[currentUser];
-    delete users[currentUser];
-    users[newUsername] = userData;
+    users[newUsername] = { ...users[loggedInUser] };
+    const orders = getOrders(loggedInUser);
+    saveOrders(newUsername, orders);
+    localStorage.removeItem(`inr_orders_${loggedInUser}`);
+    delete users[loggedInUser];
     saveUsers(users);
-    setCurrentUser(newUsername);
-    setCurrentUserState(newUsername);
+    setLoggedInUser(newUsername);
+    setUserData(users[newUsername]);
     return null;
   }
 
-  const userData = currentUser && !isAdmin ? getUsers()[currentUser] : null;
+  if (!loggedInUser) {
+    return (
+      <>
+        <LoginPage onLogin={handleLogin} onRegister={handleRegister} />
+        <Toaster richColors position="top-center" />
+      </>
+    );
+  }
+
+  if (isAdmin) {
+    return (
+      <>
+        <AdminPage
+          processingOrders={processingOrders}
+          onUpdateOrder={handleUpdateOrder}
+          onLogout={handleLogout}
+        />
+        <Toaster richColors position="top-center" />
+      </>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#FEF3E8] flex items-start justify-center">
-      <div className="w-full max-w-[430px] min-h-screen relative">
-        {isAdmin ? (
-          <AdminPage
-            processingOrders={processingOrders}
-            onUpdateOrder={handleUpdateOrder}
-            onLogout={handleLogout}
-          />
-        ) : currentUser && userData ? (
-          <MainApp
-            username={currentUser}
-            userData={userData}
-            onLogout={handleLogout}
-            onUpdateBalance={updateBalance}
-            processingOrders={processingOrders}
-            onAddProcessingOrder={addProcessingOrder}
-            onChangeUsername={handleChangeUsername}
-          />
-        ) : (
-          <LoginPage onLogin={handleLogin} onRegister={handleRegister} />
-        )}
-      </div>
-
-      {/* ₹400 Bonus Popup */}
-      <Dialog open={showBonusPopup} onOpenChange={setShowBonusPopup}>
-        <DialogContent className="max-w-[320px] rounded-3xl p-0 overflow-hidden border-0">
-          <div className="bg-orange-500 pt-8 pb-6 px-6 text-center text-white">
-            <div className="text-5xl mb-3">🎁</div>
-            <h2 className="text-2xl font-bold">Welcome Bonus!</h2>
-            <p className="text-white/80 text-sm mt-1">
-              Congratulations on joining BigBoss Pay
-            </p>
-          </div>
-          <div className="bg-white px-6 py-6 text-center">
-            <p className="text-4xl font-bold text-orange-500">₹400</p>
-            <p className="text-muted-foreground text-sm mt-1">
-              has been credited to your account
-            </p>
-            <div className="mt-4 bg-orange-50 rounded-2xl p-3">
-              <p className="text-xs text-orange-600 font-medium">
-                This bonus is a one-time first login reward. Start trading to
-                earn more!
-              </p>
-            </div>
-            <Button
-              onClick={() => setShowBonusPopup(false)}
-              className="w-full mt-5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl h-11"
-            >
-              Claim Bonus 🎉
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
+    <>
+      <MainApp
+        username={loggedInUser}
+        userData={userData!}
+        onLogout={handleLogout}
+        onUpdateBalance={handleUpdateBalance}
+        processingOrders={processingOrders}
+        onAddProcessingOrder={handleAddProcessingOrder}
+        onChangeUsername={handleChangeUsername}
+      />
       <Toaster richColors position="top-center" />
-    </div>
+    </>
   );
 }

@@ -121,6 +121,7 @@ export default function HomePage({
 
   function handleConfirmWithdraw() {
     setWithdrawError("");
+
     const amt = Number.parseFloat(withdrawAmount);
     if (!withdrawAmount || Number.isNaN(amt) || amt <= 0) {
       setWithdrawError("Please enter a valid amount");
@@ -167,7 +168,7 @@ export default function HomePage({
 
   return (
     <div className="px-4 pt-14 pb-6">
-      {/* Balance Card */}
+      {/* Balance Card — INR only */}
       <motion.div
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -186,9 +187,18 @@ export default function HomePage({
               <h2 className="font-bold text-lg leading-tight">{username}</h2>
             </div>
           </div>
-          <p className="text-white/60 text-xs mb-1">Total Balance</p>
-          <p className="text-4xl font-bold">₹{balance.toFixed(2)}</p>
-          <p className="text-white/50 text-xs mt-2">Commission Rate: 9%</p>
+          <p className="text-white/60 text-xs mb-2 font-semibold uppercase tracking-wide">
+            Your Balance
+          </p>
+          <div className="bg-white/15 rounded-2xl px-4 py-3">
+            <p className="text-white/60 text-[10px] font-semibold uppercase tracking-wide mb-1">
+              INR Balance
+            </p>
+            <p className="text-3xl font-bold leading-tight">
+              ₹{balance.toFixed(2)}
+            </p>
+            <p className="text-white/50 text-[10px] mt-1">Commission: 9%</p>
+          </div>
         </div>
       </motion.div>
 
@@ -482,7 +492,7 @@ export default function HomePage({
         </a>
       </p>
 
-      {/* Withdrawal Dialog */}
+      {/* Withdrawal Dialog — INR only */}
       <Dialog
         open={showWithdraw}
         onOpenChange={(open) => {
@@ -490,7 +500,7 @@ export default function HomePage({
         }}
       >
         <DialogContent className="max-w-[340px] rounded-3xl p-0 overflow-hidden border-0">
-          <div className="bg-gradient-to-br from-orange-600 to-orange-400 pt-6 pb-5 px-6 text-white">
+          <div className="pt-6 pb-5 px-6 text-white bg-gradient-to-br from-orange-600 to-orange-400">
             <DialogHeader>
               <DialogTitle className="text-white text-xl font-bold">
                 Withdraw Funds
@@ -518,94 +528,99 @@ export default function HomePage({
                   Done
                 </Button>
               </div>
-            ) : upiList.length === 0 ? (
-              <div className="text-center py-4">
-                <div className="text-4xl mb-3">⚠️</div>
-                <p className="font-bold text-foreground">No UPI ID Found</p>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Please add a UPI ID in the TOOL tab first before withdrawing.
-                </p>
-                <Button
-                  onClick={() => setShowWithdraw(false)}
-                  className="w-full mt-5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl h-11"
-                >
-                  Go to TOOL tab
-                </Button>
-              </div>
             ) : (
               <>
-                <div>
-                  <p className="text-sm font-semibold text-foreground/70 mb-2">
-                    Select UPI ID
-                  </p>
-                  <div className="space-y-2">
-                    {upiList.map((u) => (
-                      <button
-                        key={u.id}
-                        type="button"
-                        onClick={() => setSelectedUpi(u.upi)}
-                        className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors text-sm font-medium ${
-                          selectedUpi === u.upi
-                            ? "border-orange-500 bg-orange-50 text-orange-700"
-                            : "border-gray-200 bg-gray-50 text-foreground hover:border-orange-300"
-                        }`}
-                      >
-                        {u.upi}
-                      </button>
-                    ))}
+                {upiList.length === 0 ? (
+                  <div className="text-center py-4">
+                    <div className="text-4xl mb-3">⚠️</div>
+                    <p className="font-bold text-foreground">No UPI ID Found</p>
+                    <p className="text-muted-foreground text-sm mt-1">
+                      Please add a UPI ID in the TOOL tab first before
+                      withdrawing.
+                    </p>
+                    <Button
+                      onClick={() => setShowWithdraw(false)}
+                      className="w-full mt-5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl h-11"
+                    >
+                      Go to TOOL tab
+                    </Button>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground/70 mb-2">
+                        Select UPI ID
+                      </p>
+                      <div className="space-y-2">
+                        {upiList.map((u) => (
+                          <button
+                            key={u.id}
+                            type="button"
+                            onClick={() => setSelectedUpi(u.upi)}
+                            className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors text-sm font-medium ${
+                              selectedUpi === u.upi
+                                ? "border-orange-500 bg-orange-50 text-orange-700"
+                                : "border-gray-200 bg-gray-50 text-foreground hover:border-orange-300"
+                            }`}
+                          >
+                            {u.upi}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                <div>
-                  <p className="text-sm font-semibold text-foreground/70 mb-1.5">
-                    Quick Amount
-                  </p>
-                  <div className="flex gap-2 mb-2">
-                    {[500, 1000, 2000].map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => {
-                          setWithdrawAmount(preset.toString());
+                    <div>
+                      <p className="text-sm font-semibold text-foreground/70 mb-1.5">
+                        Quick Amount
+                      </p>
+                      <div className="flex gap-2 mb-2">
+                        {[500, 1000, 2000].map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => {
+                              setWithdrawAmount(preset.toString());
+                              setWithdrawError("");
+                            }}
+                            className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-colors ${
+                              withdrawAmount === preset.toString()
+                                ? "bg-orange-500 text-white border-orange-500"
+                                : "bg-orange-50 text-orange-600 border-orange-200 hover:border-orange-400"
+                            }`}
+                          >
+                            ₹{preset}
+                          </button>
+                        ))}
+                      </div>
+                      <Input
+                        type="number"
+                        placeholder="Or enter custom amount"
+                        value={withdrawAmount}
+                        onChange={(e) => {
+                          setWithdrawAmount(e.target.value);
                           setWithdrawError("");
                         }}
-                        className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-colors ${
-                          withdrawAmount === preset.toString()
-                            ? "bg-orange-500 text-white border-orange-500"
-                            : "bg-orange-50 text-orange-600 border-orange-200 hover:border-orange-400"
-                        }`}
-                      >
-                        ₹{preset}
-                      </button>
-                    ))}
-                  </div>
-                  <Input
-                    type="number"
-                    placeholder="Or enter custom amount"
-                    value={withdrawAmount}
-                    onChange={(e) => {
-                      setWithdrawAmount(e.target.value);
-                      setWithdrawError("");
-                    }}
-                    className="rounded-xl border-orange-200 focus-visible:ring-orange-400"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Available: ₹{balance.toFixed(2)}
-                  </p>
-                </div>
+                        className="rounded-xl border-orange-200 focus-visible:ring-orange-400"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Available: ₹{balance.toFixed(2)}
+                      </p>
+                    </div>
 
-                {withdrawError && (
-                  <p className="text-red-500 text-sm font-medium">
-                    {withdrawError}
-                  </p>
+                    {withdrawError && (
+                      <p className="text-red-500 text-sm font-medium">
+                        {withdrawError}
+                      </p>
+                    )}
+
+                    <Button
+                      onClick={handleConfirmWithdraw}
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl h-11"
+                    >
+                      Confirm Withdrawal
+                    </Button>
+                  </>
                 )}
-
-                <Button
-                  onClick={handleConfirmWithdraw}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl h-11"
-                >
-                  Confirm Withdrawal
-                </Button>
               </>
             )}
           </div>
