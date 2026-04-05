@@ -17,6 +17,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { ProcessingOrder } from "../App";
 
+type OrderBadge = "diamond_vip" | "verified" | "speed" | "fast" | "viip" | null;
+
 interface Order {
   id: string;
   code: string;
@@ -26,6 +28,7 @@ interface Order {
   status: "Succeed" | "Failed";
   claimed: boolean;
   hot?: boolean;
+  badge?: OrderBadge;
   type: "INR" | "USDT";
   usdtAmount?: number;
   ratePerUsdt?: number;
@@ -51,6 +54,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "diamond_vip",
     type: "INR",
   },
   {
@@ -62,6 +66,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "verified",
     type: "INR",
   },
   {
@@ -83,6 +88,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "speed",
     type: "INR",
   },
   {
@@ -104,6 +110,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "fast",
     type: "INR",
   },
   {
@@ -125,6 +132,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "viip",
     type: "INR",
   },
   {
@@ -146,6 +154,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "diamond_vip",
     type: "INR",
   },
   {
@@ -187,6 +196,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "verified",
     type: "INR",
   },
   {
@@ -208,6 +218,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "speed",
     type: "INR",
   },
   {
@@ -229,6 +240,7 @@ const INITIAL_INR_ORDERS: Order[] = [
     status: "Succeed",
     claimed: false,
     hot: true,
+    badge: "fast",
     type: "INR",
   },
   {
@@ -593,196 +605,114 @@ const INITIAL_INR_ORDERS: Order[] = [
   },
 ];
 
-const INITIAL_USDT_ORDERS: Order[] = [
-  {
-    id: "u1",
-    code: "USDT-10291",
-    amount: 5,
-    income: 0.45,
-    date: "01 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: false,
-    type: "USDT",
-    usdtAmount: 5,
-    ratePerUsdt: 113,
-  },
-  {
-    id: "u2",
-    code: "USDT-20834",
-    amount: 10,
-    income: 0.9,
-    date: "01 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: true,
-    type: "USDT",
-    usdtAmount: 10,
-    ratePerUsdt: 113,
-  },
-  {
-    id: "u3",
-    code: "USDT-31201",
-    amount: 20,
-    income: 1.8,
-    date: "01 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: true,
-    type: "USDT",
-    usdtAmount: 20,
-    ratePerUsdt: 114,
-  },
-  {
-    id: "u4",
-    code: "USDT-41029",
-    amount: 8,
-    income: 0.72,
-    date: "02 Apr 2026",
-    status: "Failed",
-    claimed: false,
-    type: "USDT",
-    usdtAmount: 8,
-    ratePerUsdt: 112,
-  },
-  {
-    id: "u5",
-    code: "USDT-52392",
-    amount: 15,
-    income: 1.35,
-    date: "02 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: true,
-    type: "USDT",
-    usdtAmount: 15,
-    ratePerUsdt: 113,
-  },
-  {
-    id: "u6",
-    code: "USDT-62841",
-    amount: 25,
-    income: 2.25,
-    date: "02 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    type: "USDT",
-    usdtAmount: 25,
-    ratePerUsdt: 114,
-  },
-  {
-    id: "u7",
-    code: "USDT-73923",
-    amount: 50,
-    income: 4.5,
-    date: "02 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: true,
-    type: "USDT",
-    usdtAmount: 50,
-    ratePerUsdt: 116,
-  },
-  {
-    id: "u8",
-    code: "USDT-84012",
-    amount: 30,
-    income: 2.7,
-    date: "03 Apr 2026",
-    status: "Failed",
-    claimed: false,
-    type: "USDT",
-    usdtAmount: 30,
-    ratePerUsdt: 111,
-  },
-  {
-    id: "u9",
-    code: "USDT-90234",
-    amount: 12,
-    income: 1.08,
-    date: "03 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: true,
-    type: "USDT",
-    usdtAmount: 12,
-    ratePerUsdt: 115,
-  },
-  {
-    id: "u10",
-    code: "USDT-11348",
-    amount: 7,
-    income: 0.63,
-    date: "03 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    type: "USDT",
-    usdtAmount: 7,
-    ratePerUsdt: 112,
-  },
-  {
-    id: "u11",
-    code: "USDT-22561",
-    amount: 40,
-    income: 3.6,
-    date: "03 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: true,
-    type: "USDT",
-    usdtAmount: 40,
-    ratePerUsdt: 116,
-  },
-  {
-    id: "u12",
-    code: "USDT-33872",
-    amount: 6,
-    income: 0.54,
-    date: "03 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    type: "USDT",
-    usdtAmount: 6,
-    ratePerUsdt: 113,
-  },
-  {
-    id: "u13",
-    code: "USDT-44193",
-    amount: 100,
-    income: 9.0,
-    date: "03 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    hot: true,
-    type: "USDT",
-    usdtAmount: 100,
-    ratePerUsdt: 115,
-  },
-  {
-    id: "u14",
-    code: "USDT-55304",
-    amount: 18,
-    income: 1.62,
-    date: "03 Apr 2026",
-    status: "Failed",
-    claimed: false,
-    type: "USDT",
-    usdtAmount: 18,
-    ratePerUsdt: 114,
-  },
-  {
-    id: "u15",
-    code: "USDT-66415",
-    amount: 9,
-    income: 0.81,
-    date: "03 Apr 2026",
-    status: "Succeed",
-    claimed: false,
-    type: "USDT",
-    usdtAmount: 9,
-    ratePerUsdt: 111,
-  },
+const BADGES: OrderBadge[] = [
+  "diamond_vip",
+  "verified",
+  "speed",
+  "fast",
+  "viip",
+  null,
+  null,
+  null,
 ];
+function pickBadge(i: number): OrderBadge {
+  // distribute badges: roughly 1 in 4 orders gets one, cycling through badge types
+  if (i % 4 !== 0) return null;
+  return BADGES[((i / 4) % (BADGES.length - 3)) | 0] as OrderBadge;
+}
+
+function generateUsdtOrders(): Order[] {
+  const orders: Order[] = [];
+
+  const dates = [
+    "25 Mar 2026",
+    "26 Mar 2026",
+    "27 Mar 2026",
+    "28 Mar 2026",
+    "29 Mar 2026",
+    "30 Mar 2026",
+    "31 Mar 2026",
+    "01 Apr 2026",
+    "02 Apr 2026",
+    "03 Apr 2026",
+    "04 Apr 2026",
+    "05 Apr 2026",
+  ];
+
+  const rates = [113, 113, 114, 114, 115, 115, 116];
+
+  let id = 1;
+
+  // Exactly 10 USDT — 110 orders
+  for (let i = 0; i < 110; i++) {
+    const rate = rates[i % rates.length];
+    orders.push({
+      id: `u10-${id++}`,
+      code: `USDT-${(10000 + id).toString()}`,
+      amount: 10,
+      income: Number.parseFloat((10 * 0.09).toFixed(2)),
+      date: dates[i % dates.length],
+      status: i % 5 === 0 ? "Failed" : "Succeed",
+      claimed: false,
+      hot: i % 7 === 0,
+      badge: pickBadge(i),
+      type: "USDT",
+      usdtAmount: 10,
+      ratePerUsdt: rate,
+    });
+  }
+
+  // 10-25 USDT — 215 orders with varied amounts
+  const midAmounts = [
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+  ];
+  for (let i = 0; i < 215; i++) {
+    const usdtAmt = midAmounts[i % midAmounts.length];
+    const rate = rates[i % rates.length];
+    orders.push({
+      id: `u1025-${id++}`,
+      code: `USDT-${(20000 + id).toString()}`,
+      amount: usdtAmt,
+      income: Number.parseFloat((usdtAmt * 0.09).toFixed(2)),
+      date: dates[i % dates.length],
+      status: i % 5 === 0 ? "Failed" : "Succeed",
+      claimed: false,
+      hot: i % 9 === 0,
+      badge: pickBadge(i + 3),
+      type: "USDT",
+      usdtAmount: usdtAmt,
+      ratePerUsdt: rate,
+    });
+  }
+
+  // 25-1000 USDT — 1015 orders (26 to 1000 USDT only)
+  const highAmounts = [
+    26, 30, 35, 40, 45, 50, 60, 75, 80, 100, 125, 150, 175, 200, 250, 300, 350,
+    400, 500, 600, 750, 1000,
+  ];
+  for (let i = 0; i < 1015; i++) {
+    const usdtAmt = highAmounts[i % highAmounts.length];
+    const rate = rates[i % rates.length];
+    orders.push({
+      id: `u25p-${id++}`,
+      code: `USDT-${(30000 + id).toString()}`,
+      amount: usdtAmt,
+      income: Number.parseFloat((usdtAmt * 0.09).toFixed(2)),
+      date: dates[i % dates.length],
+      status: i % 5 === 0 ? "Failed" : "Succeed",
+      claimed: false,
+      hot: i % 11 === 0,
+      badge: pickBadge(i + 1),
+      type: "USDT",
+      usdtAmount: usdtAmt,
+      ratePerUsdt: rate,
+    });
+  }
+
+  return orders;
+}
+
+const INITIAL_USDT_ORDERS: Order[] = generateUsdtOrders();
 
 const USDT_ADDRESS = "TTv5LNczW5ETb17i9ZF6CRDLtc9E9uLZXM";
 
@@ -805,8 +735,51 @@ function formatTime(seconds: number) {
   return `${m}:${s}`;
 }
 
+function OrderBadgeChip({ badge }: { badge?: OrderBadge }) {
+  if (!badge) return null;
+  const configs: Record<
+    NonNullable<OrderBadge>,
+    { label: string; className: string; icon: string }
+  > = {
+    diamond_vip: {
+      label: "💎 Diamond VIP",
+      className: "bg-gradient-to-r from-blue-600 to-purple-600 text-white",
+      icon: "",
+    },
+    verified: {
+      label: "✅ Verified",
+      className: "bg-gradient-to-r from-green-500 to-emerald-600 text-white",
+      icon: "",
+    },
+    speed: {
+      label: "⚡ Speed",
+      className: "bg-gradient-to-r from-yellow-400 to-orange-500 text-white",
+      icon: "",
+    },
+    fast: {
+      label: "🚀 Fast",
+      className: "bg-gradient-to-r from-orange-500 to-red-500 text-white",
+      icon: "",
+    },
+    viip: {
+      label: "👑 VIIP",
+      className: "bg-gradient-to-r from-yellow-500 to-amber-600 text-white",
+      icon: "",
+    },
+  };
+  const cfg = configs[badge];
+  return (
+    <span
+      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.className}`}
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
 export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
-  const [paymentTab, setPaymentTab] = useState<PaymentTab>("INR");
+  const [paymentTab, setPaymentTab] = useState<PaymentTab>("USDT");
+  const [showInrMaintenance, setShowInrMaintenance] = useState(false);
 
   // INR state
   const [orders, setOrders] = useState<Order[]>(INITIAL_INR_ORDERS);
@@ -817,6 +790,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
   const [usdtOrders, setUsdtOrders] = useState<Order[]>(INITIAL_USDT_ORDERS);
   const [usdtFilter, setUsdtFilter] = useState<UsdtFilter>("all");
   const [usdtSearch, setUsdtSearch] = useState("");
+  const [visibleUsdtCount, setVisibleUsdtCount] = useState(50);
 
   // Shared claim state
   const [claimingOrder, setClaimingOrder] = useState<Order | null>(null);
@@ -867,12 +841,20 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
   });
 
   // USDT filters
+  const count10 = usdtOrders.filter((o) => o.usdtAmount === 10).length;
+  const count1025 = usdtOrders.filter(
+    (o) => o.usdtAmount! > 10 && o.usdtAmount! <= 25,
+  ).length;
+  const count25p = usdtOrders.filter(
+    (o) => o.usdtAmount! > 25 && o.usdtAmount! <= 1000,
+  ).length;
+
   const filteredUsdtOrders = usdtOrders.filter((o) => {
     const matchFilter =
       usdtFilter === "all" ||
-      (usdtFilter === "5-10" && o.amount >= 5 && o.amount <= 10) ||
-      (usdtFilter === "10-25" && o.amount > 10 && o.amount <= 25) ||
-      (usdtFilter === "25+" && o.amount > 25);
+      (usdtFilter === "5-10" && o.usdtAmount === 10) ||
+      (usdtFilter === "10-25" && o.usdtAmount! > 10 && o.usdtAmount! <= 25) ||
+      (usdtFilter === "25+" && o.usdtAmount! > 25 && o.usdtAmount! <= 1000);
     const matchSearch =
       !usdtSearch ||
       o.code.toLowerCase().includes(usdtSearch.toLowerCase()) ||
@@ -977,6 +959,74 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
       ),
     );
     setOrderSubmitted(true);
+  }
+
+  // INR Maintenance Modal
+  if (showInrMaintenance) {
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="inr-maintenance"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center px-4 pb-8"
+          onClick={() => setShowInrMaintenance(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 60 }}
+            transition={{ type: "spring", damping: 20 }}
+            className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">🔧</span>
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                INR Transactions
+              </h2>
+              <h3 className="text-lg font-bold text-red-600 mb-3">
+                Under Maintenance
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                INR payment transactions are temporarily unavailable while we
+                perform system upgrades.
+              </p>
+              <p className="text-xs text-muted-foreground mb-5">
+                Please use{" "}
+                <span className="font-bold text-teal-600">USDT (TRC20)</span>{" "}
+                for your transactions. Service will resume shortly.
+              </p>
+              <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 w-full mb-5">
+                <p className="text-xs font-bold text-teal-700 mb-1">
+                  ✅ USDT is Available
+                </p>
+                <p className="text-xs text-teal-600">
+                  Use USDT Shot for fast &amp; secure transactions
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowInrMaintenance(false)}
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl h-12 text-sm transition-colors"
+              >
+                Use USDT Instead
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowInrMaintenance(false)}
+                className="w-full mt-2 text-muted-foreground text-sm font-medium py-2"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    );
   }
 
   // USDT QR Popup (shown as full-screen overlay)
@@ -1228,18 +1278,21 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-3xl p-5 mb-4 shadow-card flex flex-col items-center">
-                <p className="text-sm font-semibold text-foreground mb-3">
-                  Scan QR to Pay
-                </p>
-                <img
-                  src="/assets/qr-019d4996-d5b1-72e4-bad0-876839db689c.jpg"
-                  alt="UPI QR Code"
-                  className="w-52 h-52 rounded-xl border-4 border-orange-100 object-contain"
-                />
-                <p className="font-bold text-orange-500 text-xl mt-3">
-                  ₹{claimingOrder.amount.toFixed(2)}
-                </p>
+              <div className="bg-white rounded-3xl p-4 mb-4 shadow-card flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Order Amount</p>
+                  <p className="font-bold text-orange-500 text-2xl">
+                    ₹{claimingOrder.amount.toFixed(2)}
+                  </p>
+                </div>
+                <div className="bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 text-right">
+                  <p className="text-[10px] text-orange-500 font-semibold">
+                    Code
+                  </p>
+                  <p className="text-xs font-bold text-foreground">
+                    {claimingOrder.code}
+                  </p>
+                </div>
               </div>
 
               <div className="bg-white rounded-3xl p-5 mb-4 shadow-card space-y-4">
@@ -1367,7 +1420,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
       >
         <button
           type="button"
-          onClick={() => setPaymentTab("INR")}
+          onClick={() => setShowInrMaintenance(true)}
           className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all border-2 ${
             paymentTab === "INR"
               ? "bg-orange-500 text-white border-orange-500 shadow-md"
@@ -1501,6 +1554,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
                           <Flame className="w-2.5 h-2.5" /> Hot
                         </span>
                       )}
+                      <OrderBadgeChip badge={order.badge} />
                     </div>
                     <div className="flex gap-4">
                       <p className="text-sm text-foreground">
@@ -1572,7 +1626,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
                   <span className="font-bold">10 USDT FREE!</span>
                 </p>
                 <p className="text-white/60 text-[10px] mt-0.5">
-                  Rate: ₹111–₹116 per USDT · Min. sell: 5 USDT
+                  Rate: ₹113–₹116 per USDT · Min. deposit: 10 USDT
                 </p>
               </div>
             </div>
@@ -1637,9 +1691,9 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
             <Zap className="w-4 h-4 text-teal-500 shrink-0" />
             <p className="text-xs text-teal-700">
               Current Rate:{" "}
-              <span className="font-bold">₹111 – ₹116 / USDT</span>{" "}
-              &nbsp;·&nbsp; Minimum Sell:{" "}
-              <span className="font-bold">5 USDT</span>
+              <span className="font-bold">₹113 – ₹116 / USDT</span>{" "}
+              &nbsp;·&nbsp; Minimum Deposit:{" "}
+              <span className="font-bold">10 USDT</span>
             </p>
           </div>
 
@@ -1658,14 +1712,20 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
           <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
             {[
               { key: "all" as UsdtFilter, label: `All (${usdtOrders.length})` },
-              { key: "5-10" as UsdtFilter, label: "5–10 USDT" },
-              { key: "10-25" as UsdtFilter, label: "10–25 USDT" },
-              { key: "25+" as UsdtFilter, label: "25+ USDT" },
+              { key: "5-10" as UsdtFilter, label: `10 USDT (${count10})` },
+              {
+                key: "10-25" as UsdtFilter,
+                label: `10-25 USDT (${count1025})`,
+              },
+              { key: "25+" as UsdtFilter, label: `25-1000 USDT (${count25p})` },
             ].map((f) => (
               <button
                 type="button"
                 key={f.key}
-                onClick={() => setUsdtFilter(f.key)}
+                onClick={() => {
+                  setUsdtFilter(f.key);
+                  setVisibleUsdtCount(50);
+                }}
                 className={`shrink-0 text-[11px] font-semibold py-2 px-3 rounded-xl border transition-all ${
                   usdtFilter === f.key
                     ? "bg-teal-600 text-white border-teal-600 shadow-md"
@@ -1690,7 +1750,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
                 </p>
               </div>
             )}
-            {filteredUsdtOrders.map((order, i) => (
+            {filteredUsdtOrders.slice(0, visibleUsdtCount).map((order, i) => (
               <motion.div
                 key={order.id}
                 initial={{ opacity: 0, y: 8 }}
@@ -1734,6 +1794,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
                           <Flame className="w-2.5 h-2.5" /> Hot
                         </span>
                       )}
+                      <OrderBadgeChip badge={order.badge} />
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <p className="text-sm text-foreground">
@@ -1792,6 +1853,18 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
                 </div>
               </motion.div>
             ))}
+            {visibleUsdtCount < filteredUsdtOrders.length && (
+              <div className="flex justify-center pt-2 pb-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setVisibleUsdtCount((prev) => prev + 50)}
+                  className="rounded-xl border-teal-300 text-teal-700 hover:bg-teal-50 font-semibold px-6"
+                >
+                  Load More ({filteredUsdtOrders.length - visibleUsdtCount}{" "}
+                  remaining)
+                </Button>
+              </div>
+            )}
           </div>
         </>
       )}

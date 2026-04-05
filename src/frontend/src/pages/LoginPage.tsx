@@ -148,6 +148,45 @@ export default function LoginPage({ onLogin, onRegister }: Props) {
         </motion.div>
       </div>
 
+      {/* Service Status Notice */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="mx-5 mt-5 rounded-2xl overflow-hidden border border-amber-300 shadow-md"
+      >
+        {/* USDT - Working */}
+        <div className="bg-teal-600 px-4 py-3 flex items-center gap-3">
+          <span className="w-2.5 h-2.5 bg-green-300 rounded-full animate-pulse shrink-0" />
+          <div>
+            <p className="text-white font-bold text-sm">
+              ₮ USDT Transactions — Active
+            </p>
+            <p className="text-teal-100 text-xs">
+              USDT buying &amp; selling is fully operational
+            </p>
+          </div>
+          <span className="ml-auto bg-green-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+            LIVE
+          </span>
+        </div>
+        {/* INR - Maintenance */}
+        <div className="bg-red-600 px-4 py-3 flex items-center gap-3">
+          <span className="w-2.5 h-2.5 bg-yellow-300 rounded-full animate-pulse shrink-0" />
+          <div>
+            <p className="text-white font-bold text-sm">
+              🇮🇳 INR Transactions — Under Maintenance
+            </p>
+            <p className="text-red-100 text-xs">
+              INR payments are temporarily unavailable
+            </p>
+          </div>
+          <span className="ml-auto bg-yellow-400 text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+            SOON
+          </span>
+        </div>
+      </motion.div>
+
       {/* Tabs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
