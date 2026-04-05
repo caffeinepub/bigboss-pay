@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
+  Calculator,
   CheckCircle,
   Clock,
   Copy,
@@ -11,6 +12,7 @@ import {
   Search,
   TrendingUp,
   Upload,
+  X,
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -810,6 +812,10 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
   const [usdtScreenshot, setUsdtScreenshot] = useState<File | null>(null);
   const usdtFileRef = useRef<HTMLInputElement>(null);
 
+  // Calculator state
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calcInput, setCalcInput] = useState("");
+
   useEffect(() => {
     if (claimingOrder && !orderSubmitted) {
       setTimeLeft(600);
@@ -1470,12 +1476,12 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
         </p>
       </motion.div>
 
-      {/* INR / USDT Tab Toggle */}
+      {/* INR / USDT Tab Toggle + Calculator */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.04 }}
-        className="flex gap-2 mb-4"
+        className="flex gap-2 mb-4 items-center"
       >
         <button
           type="button"
@@ -1498,6 +1504,18 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
           }`}
         >
           ₮ USDT Orders
+        </button>
+        {/* Calculator Icon */}
+        <button
+          type="button"
+          onClick={() => {
+            setShowCalculator(true);
+            setCalcInput("");
+          }}
+          className="w-12 h-12 flex items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md hover:bg-amber-600 transition-all border-2 border-amber-500 flex-shrink-0"
+          title="Calculate Charges"
+        >
+          <Calculator className="w-5 h-5" />
         </button>
       </motion.div>
 
@@ -1927,6 +1945,107 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
           </div>
         </>
       )}
+      {/* Calculator Modal */}
+      <AnimatePresence>
+        {showCalculator && (
+          <motion.div
+            key="calc-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4"
+            onClick={() => setShowCalculator(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center">
+                    <Calculator className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Calculate Charges
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCalculator(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Input */}
+              <div className="mb-4">
+                <label
+                  htmlFor="calc-amount"
+                  className="text-xs font-semibold text-gray-500 mb-1.5 block"
+                >
+                  Enter Amount (₹ or USDT)
+                </label>
+                <input
+                  id="calc-amount"
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 1000"
+                  value={calcInput}
+                  onChange={(e) => setCalcInput(e.target.value)}
+                  className="w-full border-2 border-amber-200 rounded-2xl px-4 py-3 text-lg font-bold text-gray-800 focus:outline-none focus:border-amber-400 bg-amber-50 placeholder:text-gray-300"
+                />
+              </div>
+
+              {/* Result */}
+              {calcInput && Number(calcInput) > 0 ? (
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 border border-amber-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-500">Base Amount</span>
+                    <span className="font-semibold text-gray-800">
+                      {Number(calcInput).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-500">
+                      Service Charge (0.5%)
+                    </span>
+                    <span className="font-semibold text-amber-600">
+                      +{" "}
+                      {(Number(calcInput) * 0.005).toLocaleString("en-IN", {
+                        maximumFractionDigits: 4,
+                      })}
+                    </span>
+                  </div>
+                  <div className="h-px bg-amber-200 my-2" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-gray-700">
+                      Total Payable
+                    </span>
+                    <span className="text-xl font-extrabold text-amber-600">
+                      {(Number(calcInput) * 1.0005).toLocaleString("en-IN", {
+                        maximumFractionDigits: 4,
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 rounded-2xl p-4 text-center text-gray-400 text-sm border border-gray-100">
+                  Enter an amount above to see charges
+                </div>
+              )}
+
+              <p className="text-[10px] text-gray-400 text-center mt-3">
+                A 0.5% service charge is applied on all transactions
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
