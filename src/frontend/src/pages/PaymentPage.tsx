@@ -807,6 +807,8 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
   const [showUsdtQr, setShowUsdtQr] = useState(false);
   const [usdtClaimOrder, setUsdtClaimOrder] = useState<Order | null>(null);
   const [addressCopied, setAddressCopied] = useState(false);
+  const [usdtScreenshot, setUsdtScreenshot] = useState<File | null>(null);
+  const usdtFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (claimingOrder && !orderSubmitted) {
@@ -920,6 +922,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
     }
     setShowUsdtQr(false);
     setUsdtClaimOrder(null);
+    setUsdtScreenshot(null);
   }
 
   function handleCopyAddress() {
@@ -1045,6 +1048,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
             onClick={() => {
               setShowUsdtQr(false);
               setUsdtClaimOrder(null);
+              setUsdtScreenshot(null);
             }}
             className="flex items-center gap-2 text-teal-600 font-semibold mb-5"
           >
@@ -1175,6 +1179,61 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
               result in permanent loss of funds.
             </p>
           </div>
+
+          {/* Screenshot Upload */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="bg-white rounded-2xl p-4 mb-4 shadow-card"
+          >
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
+              Upload Payment Screenshot
+            </p>
+            <input
+              ref={usdtFileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setUsdtScreenshot(file);
+              }}
+            />
+            {usdtScreenshot ? (
+              <div className="relative">
+                <img
+                  src={URL.createObjectURL(usdtScreenshot)}
+                  alt="Payment screenshot"
+                  className="w-full rounded-xl border-2 border-teal-200 object-contain max-h-48"
+                />
+                <button
+                  type="button"
+                  onClick={() => setUsdtScreenshot(null)}
+                  className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow"
+                >
+                  ✕
+                </button>
+                <p className="text-xs text-teal-600 font-medium mt-2 text-center">
+                  ✅ Screenshot uploaded
+                </p>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => usdtFileRef.current?.click()}
+                className="w-full border-2 border-dashed border-teal-300 rounded-xl py-5 flex flex-col items-center gap-2 text-teal-600 hover:bg-teal-50 transition-colors"
+              >
+                <Upload className="w-7 h-7" />
+                <span className="text-sm font-semibold">
+                  Tap to upload screenshot
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  JPG, PNG supported
+                </span>
+              </button>
+            )}
+          </motion.div>
 
           {/* Done Button */}
           <Button
