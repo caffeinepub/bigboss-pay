@@ -1119,7 +1119,7 @@ export default function PaymentPage({ balance, onAddProcessingOrder }: Props) {
             className="bg-white rounded-3xl p-5 mb-4 shadow-card flex flex-col items-center"
           >
             <img
-              src="/assets/yhhjk-019d58f2-7add-7340-b5e2-637cb8b5e309.jpg"
+              src="/assets/6240149717006356187-019d61df-f361-7319-9683-76e5a0318dcd.jpg"
               alt="USDT TRC20 QR Code"
               className="w-56 h-56 rounded-2xl border-4 border-teal-100 object-contain"
             />
